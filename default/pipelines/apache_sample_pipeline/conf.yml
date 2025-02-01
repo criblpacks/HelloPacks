@@ -2,6 +2,14 @@ output: default
 groups: {}
 asyncFuncTimeout: 1000
 functions:
+  - id: eval
+    filter: "true"
+    disabled: null
+    conf:
+      add:
+        - disabled: false
+          name: start_time
+          value: Date.now()
   - id: comment
     filter: "true"
     disabled: null
@@ -42,3 +50,17 @@ functions:
       outFields:
         - lookupField: status_desc
           eventField: status_desc
+  - id: eval
+    filter: "true"
+    disabled: null
+    conf:
+      add:
+        - disabled: false
+          name: end_time
+          value: Date.now()
+        - disabled: false
+          name: duration
+          value: end_time - start_time
+      remove:
+        - start_time
+        - end_time
