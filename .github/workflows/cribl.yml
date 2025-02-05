@@ -24,8 +24,8 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
-        with:
-          ref: test
+        # with:
+        #   ref: test
       - name: Debug
         run: |
           echo "Workspace is: $GITHUB_WORKSPACE"
