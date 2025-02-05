@@ -37,26 +37,27 @@ jobs:
       # - name: Read file with path
       #   run: |
       #     cat "$(pwd)/.github/workflows/worker_groups.txt"
-      # - name: Install pack across worker groups
-      #   env:
-      #     CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
-      #     CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
-      #     CRIBL_ENDPOINT: ${{ env.TEST_ENDPOINT }}
-      #   run: |
-      #     ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
-      #     -H "Content-Type: application/json" \
-      #     -d "{\"grant_type\": \"client_credentials\",\"client_id\": \"$CRIBL_CLIENT_ID\", \"client_secret\": \"$CRIBL_CLIENT_SECRET\", \"audience\": \"https://api.cribl.cloud\"}" \
-      #     | jq -r '.access_token')
-      #     wg_list="worker_groups.txt"
-      #     while IFS= read -r WORKERGROUP || [[ -n "$WORKERGROUP" ]]; do
-      #       MAIN_ENDPOINT="$CRIBL_ENDPOINT"
-      #       WG_ENDPOINT="$MAIN_ENDPOINT/$WORKERGROUP/packs"
-      #       curl -X POST "$WG_ENDPOINT" \
-      #       -H "Authorization: Bearer $ACCESS_TOKEN" \
-      #       -H 'Content-Type: application/json' \
-      #       -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
-      #       echo "$WG_ENDPOINT"
-      #     done < "$wg_list"
+      - name: Install pack across worker groups
+        env:
+          CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
+          CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
+          CRIBL_ENDPOINT: ${{ env.TEST_ENDPOINT }}
+        run: |
+          WG_LIST="$(pwd)/worker_groups.txt"
+          ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
+          -H "Content-Type: application/json" \
+          -d "{\"grant_type\": \"client_credentials\",\"client_id\": \"$CRIBL_CLIENT_ID\", \"client_secret\": \"$CRIBL_CLIENT_SECRET\", \"audience\": \"https://api.cribl.cloud\"}" \
+          | jq -r '.access_token')
+          wg_list="worker_groups.txt"
+          while IFS= read -r WORKERGROUP || [[ -n "$WORKERGROUP" ]]; do
+            MAIN_ENDPOINT="$CRIBL_ENDPOINT"
+            WG_ENDPOINT="$MAIN_ENDPOINT/$WORKERGROUP/packs"
+            curl -X POST "$WG_ENDPOINT" \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
+            echo "$WG_ENDPOINT"
+          done < "$WG_LIST"
       # curl -X POST 'https://giovannisworkspaces-zealous-hertz-b3ds7lm.cribl.cloud/api/v1/m/default/packs' \
       # -H "Authorization: Bearer $ACCESS_TOKEN" \
       # -H 'Content-Type: application/json' \
