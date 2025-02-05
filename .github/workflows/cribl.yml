@@ -37,11 +37,10 @@ jobs:
           PACK_REPO_URL: https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git
           OVERRIDE: true
           PACK_BRANCH: test
-          CODESPACE: ${{ github.code_space_name }}
         run: |
-          echo $CODESPACE_NAME
+          echo $GITHUB_ACTION_REPOSITORY
           # WG_LIST="$(pwd)/test_worker_groups.txt"
-          WG_LIST="$(pwd)$CRIBL_WG_LIST"
+          WG_LIST="$(pwd)/$CRIBL_WG_LIST"
           ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
           -H "Content-Type: application/json" \
           -d "{\"grant_type\": \"client_credentials\",\"client_id\": \"$CRIBL_CLIENT_ID\", \"client_secret\": \"$CRIBL_CLIENT_SECRET\", \"audience\": \"https://api.cribl.cloud\"}" \
@@ -75,7 +74,7 @@ jobs:
           PACK_BRANCH: main
         run: |
           # WG_LIST="$(pwd)/prod_worker_groups.txt"
-          WG_LIST="$(pwd)$CRIBL_WG_LIST"
+          WG_LIST="$(pwd)/$CRIBL_WG_LIST"
           ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
           -H "Content-Type: application/json" \
           -d "{\"grant_type\": \"client_credentials\",\"client_id\": \"$CRIBL_CLIENT_ID\", \"client_secret\": \"$CRIBL_CLIENT_SECRET\", \"audience\": \"https://api.cribl.cloud\"}" \
