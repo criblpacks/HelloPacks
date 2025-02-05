@@ -24,27 +24,28 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
-
-      # # Load cribl client id and secret from GitHub secrets
-      # - name: Load Cribl Client ID and Secret
-      #   uses: actions/github-script@v4
-      #   env:
-      #     CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
-      #     CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
-
-      # Runs a a list of commands using the runners shell
       - name: Install pack across worker groups
         env:
           CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
           CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
+          CRIBL_ENDPOINT: ${{ env.TEST_ENDPOINT }}
         run: |
           ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
           -H "Content-Type: application/json" \
           -d "{\"grant_type\": \"client_credentials\",\"client_id\": \"$CRIBL_CLIENT_ID\", \"client_secret\": \"$CRIBL_CLIENT_SECRET\", \"audience\": \"https://api.cribl.cloud\"}" \
           | jq -r '.access_token')
-          worker_group_list=".workerGroups"
-          curl -X POST 'https://giovannisworkspaces-zealous-hertz-b3ds7lm.cribl.cloud/api/v1/m/default/packs' \
-          -H "Authorization: Bearer $ACCESS_TOKEN" \
-          -H 'Content-Type: application/json' \
-          -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
-          echo "done"
+          wg_list="worker_groups.txt"
+          while IFS= read -r WORKERGROUP || [[ -n "$WORKERGROUP" ]]; do
+            MAIN_ENDPOINT="$CRIBL_ENDPOINT"
+            WG_ENDPOINT="$MAIN_ENDPOINT/$WORKERGROUP/packs"
+            curl -X POST "$WG_ENDPOINT" \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
+            echo "$WG_ENDPOINT"
+          done < "$wg_list"          
+          # curl -X POST 'https://giovannisworkspaces-zealous-hertz-b3ds7lm.cribl.cloud/api/v1/m/default/packs' \
+          # -H "Authorization: Bearer $ACCESS_TOKEN" \
+          # -H 'Content-Type: application/json' \
+          # -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
+          # echo "done"
