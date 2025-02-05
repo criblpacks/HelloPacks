@@ -4,51 +4,41 @@ name: Push to CriblWorkerGroups
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "test" branch
+  # Triggers the workflow on push or pull request events but only for the "test and main" branch
   push:
-    branches: ["test"]
+    branches:
+      - test
+      - main
   pull_request:
-    branches: ["test"]
+    branches:
+      - test
+      - main
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+# A workflow run of the jobs needed to deploy to Cribl Worker Groups and Workspaces
 jobs:
-  # This workflow contains a single job called "build"
-  deployCriblContent:
+  # This workflow contains a single job called "deploy-to-Test" which deploys to Cribl Test Worker Groups
+  deploy-to-test:
+    if: github.ref == 'refs/heads/test'
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # Checks-out your repository under $GITHUB_WORKSPACE so your job can access it
       - uses: actions/checkout@v4
-      - name: Confirm WorkersAreReady
-        run: |
-          echo "Workspace is: $GITHUB_WORKSPACE"
-          echo "Current directory: $(pwd)"
-          ls -l "$(pwd)"
-          cat "$(pwd)/worker_groups.txt"
-          WG_LIST="$(pwd)/worker_groups.txt"
-          while IFS= read -r WORKERGROUP || [[ -n "$WORKERGROUP" ]]; do
-            echo "WorkerGroup: $WORKERGROUP"
-          done < "$WG_LIST"
-      # - name: Read file with path
-      #   run: |
-      #     cat "$(pwd)/.github/workflows/worker_groups.txt"
+      # Installs packs across worker groups
       - name: Install pack across worker groups
         env:
           CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
           CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
           CRIBL_ENDPOINT: ${{ vars.TEST_ENDPOINT }}
         run: |
-          WG_LIST="$(pwd)/worker_groups.txt"
+          WG_LIST="$(pwd)/test_worker_groups.txt"
           ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
           -H "Content-Type: application/json" \
           -d "{\"grant_type\": \"client_credentials\",\"client_id\": \"$CRIBL_CLIENT_ID\", \"client_secret\": \"$CRIBL_CLIENT_SECRET\", \"audience\": \"https://api.cribl.cloud\"}" \
           | jq -r '.access_token')
-          wg_list="worker_groups.txt"
           while IFS= read -r WORKERGROUP || [[ -n "$WORKERGROUP" ]]; do
             MAIN_ENDPOINT="$CRIBL_ENDPOINT"
             WG_ENDPOINT="$MAIN_ENDPOINT/$WORKERGROUP/packs"
@@ -58,8 +48,31 @@ jobs:
             -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
             echo "$WG_ENDPOINT"
           done < "$WG_LIST"
-      # curl -X POST 'https://giovannisworkspaces-zealous-hertz-b3ds7lm.cribl.cloud/api/v1/m/default/packs' \
-      # -H "Authorization: Bearer $ACCESS_TOKEN" \
-      # -H 'Content-Type: application/json' \
-      # -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
-      # echo "done"
+  deploy-to-prod:
+    if: github.ref == 'refs/heads/main'
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE so your job can access it
+      - uses: actions/checkout@v4
+      # Installs packs across worker groups
+      - name: Install pack across worker groups
+        env:
+          CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
+          CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
+          CRIBL_ENDPOINT: ${{ vars.PROD_ENDPOINT }}
+        run: |
+          WG_LIST="$(pwd)/prod_worker_groups.txt"
+          ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
+          -H "Content-Type: application/json" \
+          -d "{\"grant_type\": \"client_credentials\",\"client_id\": \"$CRIBL_CLIENT_ID\", \"client_secret\": \"$CRIBL_CLIENT_SECRET\", \"audience\": \"https://api.cribl.cloud\"}" \
+          | jq -r '.access_token')
+          while IFS= read -r WORKERGROUP || [[ -n "$WORKERGROUP" ]]; do
+            MAIN_ENDPOINT="$CRIBL_ENDPOINT"
+            WG_ENDPOINT="$MAIN_ENDPOINT/$WORKERGROUP/packs"
+            curl -X POST "$WG_ENDPOINT" \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
+            echo "$WG_ENDPOINT"
+          done < "$WG_LIST"
