@@ -1,0 +1,50 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Push to CriblWorkerGroups
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "test" branch
+  push:
+    branches: ["test"]
+  pull_request:
+    branches: ["test"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  deployCriblContent:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      # Load cribl client id and secret from GitHub secrets
+      - name: Load Cribl Client ID and Secret
+        uses: actions/github-script@v4
+        env:
+          CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
+          CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
+
+      # Runs a a list of commands using the runners shell
+      - name: Install pack across worker groups
+        run: |
+          ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
+          -H "Content-Type: application/json" \
+          -d "{\"grant_type\": \"client_credentials\",\"client_id\": \"$CRIBL_CLIENT_ID\", \"client_secret\": \"$CRIBL_CLIENT_SECRET\", \"audience\": \"https://api.cribl.cloud\"}" \
+          | jq -r '.access_token')
+          worker_group_list=".workerGroups"
+          curl -X POST 'https://giovannisworkspaces-zealous-hertz-b3ds7lm.cribl.cloud/api/v1/m/default/packs' \
+          -H "Authorization: Bearer $ACCESS_TOKEN" \
+          -H 'Content-Type: application/json' \
+          -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
+          echo "done"
+        env:
+          CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
+          CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
