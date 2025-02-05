@@ -28,11 +28,10 @@ jobs:
         run: |
           echo "Workspace is: $GITHUB_WORKSPACE"
           echo "Current directory: $(pwd)"
-          PATH=$(pwd)
-          cat "$PATH/.github/workflows/worker_groups.txt"
-      - name: Read file with path
-        run: |
           cat "$(pwd)/.github/workflows/worker_groups.txt"
+      # - name: Read file with path
+      #   run: |
+      #     cat "$(pwd)/.github/workflows/worker_groups.txt"
       # - name: Install pack across worker groups
       #   env:
       #     CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
