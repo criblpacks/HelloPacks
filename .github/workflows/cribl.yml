@@ -38,7 +38,7 @@ jobs:
           # PACK_REPO_API_TOKEN: ${{ secrets.REPO_PERSONAL_ACCESS_TOKEN }}
           # PACK_REPO_OWNER: ${{github.repository_owner}}
           # PACK_REPO_SUFFIX: \@github.com/${{github.repository}}.git
-          PACK_REPO_SSH_URL: "https://${{github.repository_owner}}:${{secrets.REPO_PERSONAL_ACCESS_TOKEN}}@github.com/${{github.repository}}.git"
+          PACK_REPO_SSH_URL: "https:\\/\\/${{github.repository_owner}}\\:${{secrets.REPO_PERSONAL_ACCESS_TOKEN}}\\@github.com/${{github.repository}}.git"
           # PACK_REPO_SSH_URL_1: https://${{github.repository_owner}}:${{secrets.REPO_PERSONAL_ACCESS_TOKEN}}
           # PACK_REPO_SSH_URL_2: "@github.com/"
           # PACK_REPO_SSH_URL: $PACK_REPO_SSH_URL_1$PACK_REPO_SSH_URL_2${{github.repository}}.git
