@@ -39,7 +39,7 @@ jobs:
           OVERRIDE: true
           PACK_BRANCH: main
         run: |
-          echo "PACK_REPO_URL"
+          echo "$PACK_REPO_URL"
           echo "${{github.repository}}"
           echo "${{github.repository_id}}"
           # # WG_LIST="$(pwd)/test_worker_groups.txt"
