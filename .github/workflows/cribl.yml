@@ -29,7 +29,6 @@ jobs:
           echo "Workspace is: $GITHUB_WORKSPACE"
           echo "Current directory: $(pwd)"
           PATH=$(pwd)
-          ls -al "$GITHUB_WORKSPACE"
           cat "$PATH/.github/workflows/worker_groups.txt"
       - name: Read file with path
         run: |
