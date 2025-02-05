@@ -25,15 +25,18 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
-      # Load cribl client id and secret from GitHub secrets
-      - name: Load Cribl Client ID and Secret
-        uses: actions/github-script@v4
-        env:
-          CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
-          CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
+      # # Load cribl client id and secret from GitHub secrets
+      # - name: Load Cribl Client ID and Secret
+      #   uses: actions/github-script@v4
+      #   env:
+      #     CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
+      #     CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
 
       # Runs a a list of commands using the runners shell
       - name: Install pack across worker groups
+        env:
+          CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
+          CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
         run: |
           ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
           -H "Content-Type: application/json" \
@@ -45,6 +48,3 @@ jobs:
           -H 'Content-Type: application/json' \
           -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
           echo "done"
-        env:
-          CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
-          CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
