@@ -51,12 +51,12 @@ jobs:
             echo "git+$PACK_REPO_URL"
             echo "$OVERRIDE"
             echo "$PACK_BRANCH"
-            curl -X POST "$WG_ENDPOINT" \
-            -H "Authorization: Bearer $ACCESS_TOKEN" \
-            -H 'Content-Type: application/json' \
-            -d '{"source": "git+$PACK_REPO_URL","force":$OVERRIDE,"spec":"$PACK_BRANCH","allowCustomFunctions":false}'
-            # -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
-            echo "$WG_ENDPOINT"
+            echo '{"source": "git+$PACK_REPO_URL","force":$OVERRIDE,"spec":"$PACK_BRANCH","allowCustomFunctions":false}'
+            # curl -X POST "$WG_ENDPOINT" \
+            # -H "Authorization: Bearer $ACCESS_TOKEN" \
+            # -H 'Content-Type: application/json' \
+            # -d '{"source": "git+$PACK_REPO_URL","force":$OVERRIDE,"spec":"$PACK_BRANCH","allowCustomFunctions":false}'
+            # # -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
           done < "$WG_LIST"
   deploy-to-prod:
     if: github.ref == 'refs/heads/main'
