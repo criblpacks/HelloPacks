@@ -48,6 +48,9 @@ jobs:
           while IFS= read -r WORKERGROUP || [[ -n "$WORKERGROUP" ]]; do
             MAIN_ENDPOINT="$CRIBL_ENDPOINT"
             WG_ENDPOINT="$MAIN_ENDPOINT/$WORKERGROUP/packs"
+            echo "git+$PACK_REPO_URL"
+            echo "$OVERRIDE"
+            echo "$PACK_BRANCH"
             curl -X POST "$WG_ENDPOINT" \
             -H "Authorization: Bearer $ACCESS_TOKEN" \
             -H 'Content-Type: application/json' \
