@@ -24,6 +24,13 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
+      - name: Debug
+        run: |
+          echo "Workspace is: $GITHUB_WORKSPACE"
+          ls -al "$GITHUB_WORKSPACE"
+      - name: Read file with path
+        run: |
+          cat "$GITHUB_WORKSPACE/.github/workflows/worker_groups.txt"
       - name: Install pack across worker groups
         env:
           CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
