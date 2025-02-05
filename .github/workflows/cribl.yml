@@ -27,7 +27,9 @@ jobs:
       - name: Debug
         run: |
           echo "Workspace is: $GITHUB_WORKSPACE"
+          echo "Current directory: $(pwd)"
           ls -al "$GITHUB_WORKSPACE"
+          cat .github/workflows/worker_groups.txt
       - name: Read file with path
         run: |
           cat "$GITHUB_WORKSPACE/.github/workflows/worker_groups.txt"
