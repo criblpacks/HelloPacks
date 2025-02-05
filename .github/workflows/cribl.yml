@@ -24,14 +24,16 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
-        # with:
-        #   ref: test
-      - name: Debug
+      - name: Confirm WorkersAreReady
         run: |
           echo "Workspace is: $GITHUB_WORKSPACE"
           echo "Current directory: $(pwd)"
           ls -l "$(pwd)"
           cat "$(pwd)/worker_groups.txt"
+          WG_LIST="$(pwd)/worker_groups.txt"
+          while IFS= read -r WORKERGROUP || [[ -n "$WORKERGROUP" ]]; do
+            echo "WorkerGroup: $WORKERGROUP"
+          done < "$WG_LIST"
       # - name: Read file with path
       #   run: |
       #     cat "$(pwd)/.github/workflows/worker_groups.txt"
