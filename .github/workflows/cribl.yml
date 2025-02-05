@@ -35,16 +35,14 @@ jobs:
           CRIBL_ENDPOINT: ${{ vars.TEST_ENDPOINT }}
           CRIBL_WG_LIST: test_worker_groups.txt
           PACK_REPO_HTTPS_URL: git+${{github.server_url}}/${{github.repository}}.git
-          PACK_REPO_API_TOKEN: ${{ secrets.REPO_PERSONAL_ACCESS_TOKEN }}
-          PACK_REPO_SSH_URL: https://${{github.repository_owner}}:$PACK_REPO_API_TOKEN@github.com/${{github.repository}}.git
-          #PACK_REPO_SSH_URL: https://${{github.repository_owner}}:${{secrets.REPO_PERSONAL_ACCESS_TOKEN}}@github.com/${{github.repository}}.git
+          # PACK_REPO_API_TOKEN: ${{ secrets.REPO_PERSONAL_ACCESS_TOKEN }}
+          # PACK_REPO_OWNER: ${{github.repository_owner}}
+          # PACK_REPO_SUFFIX: \@github.com/${{github.repository}}.git
+          PACK_REPO_SSH_URL: https://${{github.repository_owner}}:${{secrets.REPO_PERSONAL_ACCESS_TOKEN}}\@github.com/${{github.repository}}.git
           #PACK_REPO_URL: https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git
           OVERRIDE: true
           PACK_BRANCH: test
         run: |
-          echo "${{github.repository_owner}}"
-          echo "${{github.repository}}"
-          echo "${{github.repository_id}}"
           echo "$PACK_REPO_SSH_URL"
           # # WG_LIST="$(pwd)/test_worker_groups.txt"
           WG_LIST="$(pwd)/$CRIBL_WG_LIST"
