@@ -32,7 +32,7 @@ jobs:
           cat .github/workflows/worker_groups.txt
       - name: Read file with path
         run: |
-          cat "$GITHUB_WORKSPACE/.github/workflows/worker_groups.txt"
+          cat "$(pwd)/.github/workflows/worker_groups.txt"
       # - name: Install pack across worker groups
       #   env:
       #     CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
