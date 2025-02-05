@@ -35,7 +35,7 @@ jobs:
           CRIBL_ENDPOINT: ${{ vars.TEST_ENDPOINT }}
           CRIBL_WG_LIST: test_worker_groups.txt
           PACK_REPO_HTTPS_URL: git+${{github.server_url}}/${{github.repository}}.git
-          PACK_REPO_SSH_URL: "https://${{  github.repository_owner  }}:${{  secrets.REPO_PERSONAL_ACCESS_TOKEN  }}@github.com/${{  github.repository  }}.git"
+          PACK_REPO_SSH_URL: "https:////${{  github.repository_owner  }}::${{  secrets.REPO_PERSONAL_ACCESS_TOKEN  }}@@github.com/${{  github.repository  }}.git"
           OVERRIDE: true
           PACK_BRANCH: test
         run: |
