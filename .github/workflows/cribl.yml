@@ -48,15 +48,10 @@ jobs:
           while IFS= read -r WORKERGROUP || [[ -n "$WORKERGROUP" ]]; do
             MAIN_ENDPOINT="$CRIBL_ENDPOINT"
             WG_ENDPOINT="$MAIN_ENDPOINT/$WORKERGROUP/packs"
-            echo "git+$PACK_REPO_URL"
-            echo "$OVERRIDE"
-            echo "$PACK_BRANCH"
-            echo "{\"source\": \"git+$PACK_REPO_URL\",\"force\":$OVERRIDE,\"spec\":\"$PACK_BRANCH\",\"allowCustomFunctions\":false}"
-            # curl -X POST "$WG_ENDPOINT" \
-            # -H "Authorization: Bearer $ACCESS_TOKEN" \
-            # -H 'Content-Type: application/json' \
-            # -d '{"source": "git+$PACK_REPO_URL","force":$OVERRIDE,"spec":"$PACK_BRANCH","allowCustomFunctions":false}'
-            # # -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
+            curl -X POST "$WG_ENDPOINT" \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d "{\"source\": \"git+$PACK_REPO_URL\",\"force\":$OVERRIDE,\"spec\":\"$PACK_BRANCH\",\"allowCustomFunctions\":false}"
           done < "$WG_LIST"
   deploy-to-prod:
     if: github.ref == 'refs/heads/main'
@@ -77,6 +72,8 @@ jobs:
           PACK_BRANCH: main
         run: |
           # WG_LIST="$(pwd)/prod_worker_groups.txt"
+          echo "${{github.repository}}"
+          echo "${{github.repository.id}}"
           WG_LIST="$(pwd)/$CRIBL_WG_LIST"
           ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
           -H "Content-Type: application/json" \
@@ -90,5 +87,4 @@ jobs:
             -H 'Content-Type: application/json' \
             -d '{"source": "git+$PACK_REPO_URL","force":$OVERRIDE,"spec":"$PACK_BRANCH","allowCustomFunctions":false}'
             # -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
-            echo "$WG_ENDPOINT"
           done < "$WG_LIST"
