@@ -33,8 +33,15 @@ jobs:
           CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
           CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
           CRIBL_ENDPOINT: ${{ vars.TEST_ENDPOINT }}
+          CRIBL_WG_LIST: test_worker_groups.txt
+          PACK_REPO_URL: https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git
+          OVERRIDE: true
+          PACK_BRANCH: test
+          CODESPACE: ${{ github.code_space_name }}
         run: |
-          WG_LIST="$(pwd)/test_worker_groups.txt"
+          echo $CODESPACE_NAME
+          # WG_LIST="$(pwd)/test_worker_groups.txt"
+          WG_LIST="$(pwd)$CRIBL_WG_LIST"
           ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
           -H "Content-Type: application/json" \
           -d "{\"grant_type\": \"client_credentials\",\"client_id\": \"$CRIBL_CLIENT_ID\", \"client_secret\": \"$CRIBL_CLIENT_SECRET\", \"audience\": \"https://api.cribl.cloud\"}" \
@@ -45,7 +52,8 @@ jobs:
             curl -X POST "$WG_ENDPOINT" \
             -H "Authorization: Bearer $ACCESS_TOKEN" \
             -H 'Content-Type: application/json' \
-            -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
+            -d '{"source": "git+$PACK_REPO_URL","force":$OVERRIDE,"spec":"$PACK_BRANCH","allowCustomFunctions":false}'
+            # -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
             echo "$WG_ENDPOINT"
           done < "$WG_LIST"
   deploy-to-prod:
@@ -61,8 +69,13 @@ jobs:
           CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
           CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
           CRIBL_ENDPOINT: ${{ vars.PROD_ENDPOINT }}
+          CRIBL_WG_LIST: prod_worker_groups.txt
+          PACK_REPO_URL: https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git
+          OVERRIDE: true
+          PACK_BRANCH: main
         run: |
-          WG_LIST="$(pwd)/prod_worker_groups.txt"
+          # WG_LIST="$(pwd)/prod_worker_groups.txt"
+          WG_LIST="$(pwd)$CRIBL_WG_LIST"
           ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
           -H "Content-Type: application/json" \
           -d "{\"grant_type\": \"client_credentials\",\"client_id\": \"$CRIBL_CLIENT_ID\", \"client_secret\": \"$CRIBL_CLIENT_SECRET\", \"audience\": \"https://api.cribl.cloud\"}" \
@@ -73,6 +86,7 @@ jobs:
             curl -X POST "$WG_ENDPOINT" \
             -H "Authorization: Bearer $ACCESS_TOKEN" \
             -H 'Content-Type: application/json' \
-            -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
+            -d '{"source": "git+$PACK_REPO_URL","force":$OVERRIDE,"spec":"$PACK_BRANCH","allowCustomFunctions":false}'
+            # -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
             echo "$WG_ENDPOINT"
           done < "$WG_LIST"
