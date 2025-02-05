@@ -35,32 +35,25 @@ jobs:
           CRIBL_ENDPOINT: ${{ vars.TEST_ENDPOINT }}
           CRIBL_WG_LIST: test_worker_groups.txt
           PACK_REPO_HTTPS_URL: git+${{github.server_url}}/${{github.repository}}.git
-          # PACK_REPO_API_TOKEN: ${{ secrets.REPO_PERSONAL_ACCESS_TOKEN }}
-          # PACK_REPO_OWNER: ${{github.repository_owner}}
-          # PACK_REPO_SUFFIX: \@github.com/${{github.repository}}.git
-          PACK_REPO_SSH_URL: "https:\\/\\/${{github.repository_owner}}\\:${{secrets.REPO_PERSONAL_ACCESS_TOKEN}}\\@github.com/${{github.repository}}.git"
-          # PACK_REPO_SSH_URL_1: https://${{github.repository_owner}}:${{secrets.REPO_PERSONAL_ACCESS_TOKEN}}
-          # PACK_REPO_SSH_URL_2: "@github.com/"
-          # PACK_REPO_SSH_URL: $PACK_REPO_SSH_URL_1$PACK_REPO_SSH_URL_2${{github.repository}}.git
-          # #PACK_REPO_URL: https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git
+          PACK_REPO_SSH_URL: "https://${{  github.repository_owner  }}:${{  secrets.REPO_PERSONAL_ACCESS_TOKEN  }}@github.com/${{  github.repository  }}.git"
           OVERRIDE: true
           PACK_BRANCH: test
         run: |
           echo "$PACK_REPO_SSH_URL"
           # # WG_LIST="$(pwd)/test_worker_groups.txt"
-          WG_LIST="$(pwd)/$CRIBL_WG_LIST"
-          ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
-          -H "Content-Type: application/json" \
-          -d "{\"grant_type\": \"client_credentials\",\"client_id\": \"$CRIBL_CLIENT_ID\", \"client_secret\": \"$CRIBL_CLIENT_SECRET\", \"audience\": \"https://api.cribl.cloud\"}" \
-          | jq -r '.access_token')
-          while IFS= read -r WORKERGROUP || [[ -n "$WORKERGROUP" ]]; do
-            MAIN_ENDPOINT="$CRIBL_ENDPOINT"
-            WG_ENDPOINT="$MAIN_ENDPOINT/$WORKERGROUP/packs"
-            curl -X POST "$WG_ENDPOINT" \
-            -H "Authorization: Bearer $ACCESS_TOKEN" \
-            -H 'Content-Type: application/json' \
-            -d "{\"source\": \"$PACK_REPO_SSH_URL\",\"force\":$OVERRIDE,\"spec\":\"$PACK_BRANCH\",\"allowCustomFunctions\":false}"
-          done < "$WG_LIST"
+          # WG_LIST="$(pwd)/$CRIBL_WG_LIST"
+          # ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
+          # -H "Content-Type: application/json" \
+          # -d "{\"grant_type\": \"client_credentials\",\"client_id\": \"$CRIBL_CLIENT_ID\", \"client_secret\": \"$CRIBL_CLIENT_SECRET\", \"audience\": \"https://api.cribl.cloud\"}" \
+          # | jq -r '.access_token')
+          # while IFS= read -r WORKERGROUP || [[ -n "$WORKERGROUP" ]]; do
+          #   MAIN_ENDPOINT="$CRIBL_ENDPOINT"
+          #   WG_ENDPOINT="$MAIN_ENDPOINT/$WORKERGROUP/packs"
+          #   curl -X POST "$WG_ENDPOINT" \
+          #   -H "Authorization: Bearer $ACCESS_TOKEN" \
+          #   -H 'Content-Type: application/json' \
+          #   -d "{\"source\": \"$PACK_REPO_SSH_URL\",\"force\":$OVERRIDE,\"spec\":\"$PACK_BRANCH\",\"allowCustomFunctions\":false}"
+          # done < "$WG_LIST"
   deploy-to-prod:
     if: github.ref == 'refs/heads/main'
     # The type of runner that the job will run on
