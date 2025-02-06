@@ -35,11 +35,21 @@ jobs:
           CRIBL_ENDPOINT: ${{ vars.TEST_ENDPOINT }}
           CRIBL_WG_LIST: test_worker_groups.txt
           PACK_REPO_HTTPS_URL: git+${{github.server_url}}/${{github.repository}}.git
-          PACK_REPO_SSH_URL: "https:////${{  github.repository_owner  }}::${{  secrets.REPO_PERSONAL_ACCESS_TOKEN  }}@@github.com/${{  github.repository  }}.git"
+          PACK_REPO_SSH_TOKEN: ${{  secrets.REPO_PERSONAL_ACCESS_TOKEN  }}
+          REPO_OWNER: ${{  github.repository_owner  }}
+          REPO_NAME: ${{  github.repository  }}
+          # PACK_REPO_SSH_TOKEN: "https://${{  github.repository_owner  }}:${{  secrets.REPO_PERSONAL_ACCESS_TOKEN  }}@github.com/${{  github.repository  }}.git"
           OVERRIDE: true
           PACK_BRANCH: test
         run: |
           echo "$PACK_REPO_SSH_URL"
+          USE_HTTP_GIT=false
+          if [[ ""USE_HTTP_GIT"" == "true" ]]; then
+            PACK_REPO_URL="$PACK_REPO_HTTPS_URL"
+          else
+            PACK_REPO_URL="https://$REPO_OWNER:$PACK_REPO_SSH_TOKEN@github.com/$REPO_NAME.git"
+          fi
+          echo "$PACK_REPO_URL"
           # # WG_LIST="$(pwd)/test_worker_groups.txt"
           # WG_LIST="$(pwd)/$CRIBL_WG_LIST"
           # ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
