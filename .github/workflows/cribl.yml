@@ -42,14 +42,11 @@ jobs:
           OVERRIDE: true
           PACK_BRANCH: test
         run: |
-          GIT_TOKEN="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"
           USE_HTTP_GIT=false
           if [[ ""USE_HTTP_GIT"" == "true" ]]; then
             PACK_REPO_URL="$PACK_REPO_HTTPS_URL"
           else
-            # PACK_REPO_URL="git+https://$REPO_OWNER:$PACK_REPO_SSH_TOKEN@github.com/$REPO_NAME.git"
-            PACK_REPO_URL="git+https://$REPO_OWNER:$GIT_TOKEN@github.com/$REPO_NAME.git"
-            # https://gcribl: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@github.com/gcribl/HelloPacks.git
+            PACK_REPO_URL="git+https://$REPO_OWNER:$PACK_REPO_SSH_TOKEN@github.com/$REPO_NAME.git"
           fi
           echo "$PACK_REPO_URL"
           # WG_LIST="$(pwd)/test_worker_groups.txt"
@@ -64,7 +61,7 @@ jobs:
             curl -X POST "$WG_ENDPOINT" \
             -H "Authorization: Bearer $ACCESS_TOKEN" \
             -H 'Content-Type: application/json' \
-            -d "{\"source\": \"$PACK_REPO_SSH_URL\",\"force\":$OVERRIDE,\"spec\":\"$PACK_BRANCH\",\"allowCustomFunctions\":false}"
+            -d "{\"source\": \"$PACK_REPO_URL\",\"force\":$OVERRIDE,\"spec\":\"$PACK_BRANCH\",\"allowCustomFunctions\":false}"
           done < "$WG_LIST"
   deploy-to-prod:
     if: github.ref == 'refs/heads/main'
