@@ -38,7 +38,6 @@ jobs:
           PACK_REPO_SSH_TOKEN: ${{  secrets.REPO_PERSONAL_ACCESS_TOKEN  }}
           REPO_OWNER: ${{  github.repository_owner  }}
           REPO_NAME: ${{  github.repository  }}
-          # PACK_REPO_SSH_TOKEN: "https://${{  github.repository_owner  }}:${{  secrets.REPO_PERSONAL_ACCESS_TOKEN  }}@github.com/${{  github.repository  }}.git"
           OVERRIDE: true
           PACK_BRANCH: test
         run: |
@@ -48,8 +47,6 @@ jobs:
           else
             PACK_REPO_URL="git+https://$REPO_OWNER:$PACK_REPO_SSH_TOKEN@github.com/$REPO_NAME.git"
           fi
-          echo "$PACK_REPO_URL"
-          # WG_LIST="$(pwd)/test_worker_groups.txt"
           WG_LIST="$(pwd)/$CRIBL_WG_LIST"
           ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
           -H "Content-Type: application/json" \
@@ -75,16 +72,21 @@ jobs:
         env:
           CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
           CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
-          CRIBL_ENDPOINT: ${{ vars.PROD_ENDPOINT }}
+          CRIBL_ENDPOINT: ${{ vars.TEST_ENDPOINT }}
           CRIBL_WG_LIST: prod_worker_groups.txt
-          PACK_REPO_HTTPS_URL: ${{github.server_url}}/${{github.repository}}.git
-          PACK_REPO_SSH_URL: git@github.com:${{github.repository}}.git
+          PACK_REPO_HTTPS_URL: git+${{github.server_url}}/${{github.repository}}.git
+          PACK_REPO_SSH_TOKEN: ${{  secrets.REPO_PERSONAL_ACCESS_TOKEN  }}
+          REPO_OWNER: ${{  github.repository_owner  }}
+          REPO_NAME: ${{  github.repository  }}
           OVERRIDE: true
           PACK_BRANCH: main
         run: |
-          # WG_LIST="$(pwd)/prod_worker_groups.txt"
-          echo "${{github.repository}}"
-          echo "${{github.repository.id}}"
+          USE_HTTP_GIT=false
+          if [[ ""USE_HTTP_GIT"" == "true" ]]; then
+            PACK_REPO_URL="$PACK_REPO_HTTPS_URL"
+          else
+            PACK_REPO_URL="git+https://$REPO_OWNER:$PACK_REPO_SSH_TOKEN@github.com/$REPO_NAME.git"
+          fi
           WG_LIST="$(pwd)/$CRIBL_WG_LIST"
           ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
           -H "Content-Type: application/json" \
@@ -96,6 +98,5 @@ jobs:
             curl -X POST "$WG_ENDPOINT" \
             -H "Authorization: Bearer $ACCESS_TOKEN" \
             -H 'Content-Type: application/json' \
-            -d "{\"source\": \"git+$PACK_REPO_SSH_URL\",\"force\":$OVERRIDE,\"spec\":\"$PACK_BRANCH\",\"allowCustomFunctions\":false}"
-            # -d '{"source": "git+https://github.com/criblpacks/cribl-splunk-uf-internal-redux.git","force":true,"spec":"main","allowCustomFunctions":false}'
+            -d "{\"source\": \"$PACK_REPO_URL\",\"force\":$OVERRIDE,\"spec\":\"$PACK_BRANCH\",\"allowCustomFunctions\":false}"
           done < "$WG_LIST"
