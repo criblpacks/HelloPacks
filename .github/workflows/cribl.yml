@@ -107,7 +107,7 @@ jobs:
       - name: Install pack across worker groups
         env:
           CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
-          CRIBL_ENDPOINT: ${{ vars.PROD_ENDPOINT }}
+          CRIBL_ENDPOINT: ${{ vars.TEST_ENDPOINT }}
           CRIBL_WG_LIST: prod_worker_groups.txt
           PACK_REPO_HTTPS_URL: git+${{github.server_url}}/${{github.repository}}.git
           PACK_REPO_SSH_TOKEN: ${{  secrets.REPO_PERSONAL_ACCESS_TOKEN  }}
@@ -123,10 +123,13 @@ jobs:
           USE_HTTPS_GIT=$PUBLIC_REPO
           # Checks whether user has set 
           if [[ ""USE_HTTPS_GIT"" == "true" ]]; then
+          USE_HTTP_GIT=false
+          if [[ ""USE_HTTP_GIT"" == "true" ]]; then
             PACK_REPO_URL="$PACK_REPO_HTTPS_URL"
           else
             PACK_REPO_URL="git+https://$REPO_OWNER:$PACK_REPO_SSH_TOKEN@github.com/$REPO_NAME.git"
           fi
+
           echo "$PACK_REPO_URL"
           WG_LIST="$(pwd)/$CRIBL_WG_LIST"
           ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
