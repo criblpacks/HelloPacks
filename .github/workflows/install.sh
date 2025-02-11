@@ -42,7 +42,7 @@ INSTALL_PACK_VERSION=$(echo "$INSTALL_RESPONSE_BODY" | jq -r '.items[0].version'
 # Checks if the pack installation request was successful
 if [ "$INSTALL_HTTP_CODE" -eq 200 ]; then
     echo "Pack install request succeeded with status code $INSTALL_HTTP_CODE."
-    echo "The pack: $INSTALL_PACK_ID and version: $INSTALL_PACK_VERSION was installed to worker group: $WORKERGROUP."
+    echo "The pack: $INSTALL_PACK_ID version: $INSTALL_PACK_VERSION was installed to worker group: $WORKERGROUP."
     echo "----------------------------------------"
 else
     echo "Pack install request failed with status code $INSTALL_HTTP_CODE."
