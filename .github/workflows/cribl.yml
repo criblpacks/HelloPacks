@@ -26,10 +26,14 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: .scripts
+        working-directory: .github/workflows
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE so your job can access it
-      - uses: actions/checkout@v4
+      - name: Checkout out the repo to the runner
+        uses: actions/checkout@v4
+      # Updates the permission of the script such that it is executable
+      - name: Make the script executeable
+        run: chmod +x install.sh
       # Installs packs across worker groups
       - name: Install pack across worker groups
         env:
@@ -55,10 +59,14 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: .scripts
+        working-directory: .github/workflows
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE so your job can access it
-      - uses: actions/checkout@v4
+      - name: Checkout out the repo to the runner
+        uses: actions/checkout@v4
+      # Updates the permission of the script such that it is executable
+      - name: Make the script executeable
+        run: chmod +x install.sh
       # Installs packs across worker groups
       - name: Install pack across worker groups
         env:
