@@ -70,6 +70,7 @@ jobs:
       # Installs packs across worker groups
       - name: Install pack across worker groups
         env:
+          CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
           CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
           CRIBL_ENDPOINT: ${{ vars.PROD_ENDPOINT }}
           CRIBL_WG_LIST: prod_worker_groups.txt
