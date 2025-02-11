@@ -64,7 +64,7 @@ jobs:
           ACCESS_TOKEN=$(echo "$AUTH_RESPONSE" | sed '$d' | jq -r '.access_token')
           echo "Checking auth response"
           # Checks if the authentication request was successful
-          if [ "AUTH_HTTP_CODE" -eq 200 ]; then
+          if [ "$AUTH_HTTP_CODE" -eq 200 ]; then
             echo "Request succeeded with status code $AUTH_HTTP_CODE."
             echo "----------------------------------------"
           else
