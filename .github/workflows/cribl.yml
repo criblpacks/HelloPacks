@@ -8,11 +8,11 @@ on:
   push:
     branches:
       - test
-      - main
+      # - main
   pull_request:
     branches:
       - test
-      - main
+      # - main
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -38,27 +38,60 @@ jobs:
           PACK_REPO_SSH_TOKEN: ${{  secrets.REPO_PERSONAL_ACCESS_TOKEN  }}
           REPO_OWNER: ${{  github.repository_owner  }}
           REPO_NAME: ${{  github.repository  }}
+          # Set the install type to override the install if a pack exists in a destination worker group
           OVERRIDE: true
+          # Set the branch of the pack to push to the worker groups
           PACK_BRANCH: test
+          # Set to true if using a public repo and false if using a private repo
+          PUBLIC_REPO: false
         run: |
-          USE_HTTP_GIT=false
-          if [[ ""USE_HTTP_GIT"" == "true" ]]; then
+          USE_HTTPS_GIT=$PUBLIC_REPO
+          # Checks whether a private or public repository is being used.
+          if [[ ""USE_HTTPS_GIT"" == "true" ]]; then
             PACK_REPO_URL="$PACK_REPO_HTTPS_URL"
           else
             PACK_REPO_URL="git+https://$REPO_OWNER:$PACK_REPO_SSH_TOKEN@github.com/$REPO_NAME.git"
           fi
+          # Reads the list of worker groups to install the pack to
           WG_LIST="$(pwd)/$CRIBL_WG_LIST"
-          ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
+          # Gets the access token to authenticate with the Cribl API
+          AUTH_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://login.cribl.cloud/oauth/token" \
           -H "Content-Type: application/json" \
           -d "{\"grant_type\": \"client_credentials\",\"client_id\": \"$CRIBL_CLIENT_ID\", \"client_secret\": \"$CRIBL_CLIENT_SECRET\", \"audience\": \"https://api.cribl.cloud\"}" \
-          | jq -r '.access_token')
+          || exit 1)
+          AUTH_HTTP_CODE=$(echo "$AUTH_RESPONSE" | tail -n1)
+          ACCESS_TOKEN=$(echo "$AUTH_RESPONSE" | head -n-1 | jq -r '.access_token')
+          # Checks if the authentication request was successful
+          if [ "$HTTP_CODE" -eq 200 ]; then
+            echo "Request succeeded with status code $HTTP_CODE."
+            echo "----------------------------------------"
+          else
+            echo "Request failed with status code $HTTP_CODE."
+            echo "----------------------------------------"
+            # Exit on the first non-200 response
+            exit 1
+          fi
           while IFS= read -r WORKERGROUP || [[ -n "$WORKERGROUP" ]]; do
             MAIN_ENDPOINT="$CRIBL_ENDPOINT"
             WG_ENDPOINT="$MAIN_ENDPOINT/$WORKERGROUP/packs"
-            curl -X POST "$WG_ENDPOINT" \
+            INSTALL_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$WG_ENDPOINT" \
             -H "Authorization: Bearer $ACCESS_TOKEN" \
             -H 'Content-Type: application/json' \
-            -d "{\"source\": \"$PACK_REPO_URL\",\"force\":$OVERRIDE,\"spec\":\"$PACK_BRANCH\",\"allowCustomFunctions\":false}"
+            -d "{\"source\": \"$PACK_REPO_URL\",\"force\":$OVERRIDE,\"spec\":\"$PACK_BRANCH\",\"allowCustomFunctions\":false}" \
+            || exit 1)
+            INSTALL_HTTP_CODE=$(echo "$INSTALL_RESPONSE" | tail -n1)
+            INSTALL__RESPONSE_BODY=$(echo "$INSTALL_RESPONSE" | sed '$ d')
+            # Checks if the pack installation request was successful
+            if [ "$INSTALL_HTTP_CODE" -eq 200 ]; then
+              echo "Pack install request succeeded with status code $INSTALL_HTTP_CODE."
+              echo "Pack was installed to worker group $WORKERGROUP. Response: $INSTALL__RESPONSE_BODY"
+              echo "----------------------------------------"
+            else
+              echo "Pack install request failed with status code $INSTALL_HTTP_CODE."
+              echo "----------------------------------------"
+              # Exit on the first non-200 response
+              exit 1
+            fi
           done < "$WG_LIST"
   deploy-to-prod:
     if: github.ref == 'refs/heads/main'
@@ -70,7 +103,6 @@ jobs:
       # Installs packs across worker groups
       - name: Install pack across worker groups
         env:
-          CRIBL_CLIENT_ID: ${{ secrets.CRIBL_CLIENT_ID }}
           CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
           CRIBL_ENDPOINT: ${{ vars.TEST_ENDPOINT }}
           CRIBL_WG_LIST: prod_worker_groups.txt
@@ -78,15 +110,24 @@ jobs:
           PACK_REPO_SSH_TOKEN: ${{  secrets.REPO_PERSONAL_ACCESS_TOKEN  }}
           REPO_OWNER: ${{  github.repository_owner  }}
           REPO_NAME: ${{  github.repository  }}
+          # Set the install type to override the install if a pack exists in a destination worker group
           OVERRIDE: true
+          # Set the branch of the pack to push to the worker groups
           PACK_BRANCH: main
+          # Set to true if using a public repo and false if using a private repo
+          PUBLIC_REPO: false
         run: |
+          USE_HTTPS_GIT=$PUBLIC_REPO
+          # Checks whether user has set 
+          if [[ ""USE_HTTPS_GIT"" == "true" ]]; then
           USE_HTTP_GIT=false
           if [[ ""USE_HTTP_GIT"" == "true" ]]; then
             PACK_REPO_URL="$PACK_REPO_HTTPS_URL"
           else
             PACK_REPO_URL="git+https://$REPO_OWNER:$PACK_REPO_SSH_TOKEN@github.com/$REPO_NAME.git"
           fi
+
+          echo "$PACK_REPO_URL"
           WG_LIST="$(pwd)/$CRIBL_WG_LIST"
           ACCESS_TOKEN=$(curl -X POST "https://login.cribl.cloud/oauth/token" \
           -H "Content-Type: application/json" \
