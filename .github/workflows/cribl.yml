@@ -71,7 +71,7 @@ jobs:
       - name: Install pack across worker groups
         env:
           CRIBL_CLIENT_SECRET: ${{ secrets.CRIBL_CLIENT_SECRET }}
-          CRIBL_ENDPOINT: ${{ vars.TEST_ENDPOINT }}
+          CRIBL_ENDPOINT: ${{ vars.PROD_ENDPOINT }}
           CRIBL_WG_LIST: prod_worker_groups.txt
           PACK_REPO_HTTPS_URL: git+${{github.server_url}}/${{github.repository}}.git
           PACK_REPO_SSH_TOKEN: ${{  secrets.REPO_PERSONAL_ACCESS_TOKEN  }}
