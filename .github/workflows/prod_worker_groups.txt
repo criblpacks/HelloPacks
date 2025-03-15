@@ -1,7 +1,2 @@
 default
 defaultHybrid
-MSSP-ingestion-service
-Azure-Group-1
-US-West-Azure
-NewGroup2
-NewGroup3
